@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>あなたにピッタリの健康診断 | リベ大クリニック</title>
+    <meta
+      name="description"
+      content="かんたんな質問に答えるだけで、あなたにおすすめの健診コースがわかります。リベ大クリニック大阪院。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      button {
+        font-family: inherit;
+      }
+      @keyframes fadeSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/@babel/standalone/babel.min.js"
+    ></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState } = React;
+
+      const COURSES = {
+        kensinA: {
+          name: "健診A",
+          subtitle: "簡易健診",
+          description:
+            "法定健診から採血と心電図を除いた簡略版。短時間で基本的な健康チェックができます。",
+          includes: [
+            "問診・既往歴の確認",
+            "身長・体重・BMI・腹囲測定",
+            "血圧測定",
+            "視力検査",
+            "聴力検査",
+            "尿検査（糖・蛋白）",
+            "胸部レントゲン",
+            "医師の診察",
+          ],
+          notIncludes: ["採血検査", "心電図検査"],
+          bestFor: "時間をかけずに最低限のチェックをしたい方",
+          color: "#5B9BD5",
+          icon: "⚡",
+        },
+        kensinB: {
+          name: "健診B（法定健診）",
+          subtitle: "定期健康診断",
+          description:
+            "労働安全衛生法で義務付けられた定期健康診断。職場の健診として最も一般的なコースです。",
+          includes: [
+            "問診・既往歴の確認",
+            "身長・体重・BMI・腹囲測定",
+            "血圧測定",
+            "視力検査",
+            "聴力検査",
+            "尿検査（糖・蛋白）",
+            "胸部レントゲン",
+            "心電図検査",
+            "採血検査（血糖・脂質・肝機能・貧血など）",
+            "医師の診察",
+          ],
+          bestFor: "会社の定期健診として、または基本的な健康チェックをしたい方",
+          color: "#4A86C8",
+          icon: "📋",
+        },
+        kensinC: {
+          name: "健診C（生活習慣病健診）",
+          subtitle: "生活習慣病チェック",
+          description:
+            "法定健診に便潜血検査と追加の採血項目を加えた充実コース。生活習慣病のリスクを幅広くチェックします。",
+          includes: [
+            "問診・既往歴の確認",
+            "身長・体重・BMI・腹囲測定",
+            "血圧測定",
+            "視力検査",
+            "聴力検査",
+            "尿検査（糖・蛋白）",
+            "胸部レントゲン",
+            "心電図検査",
+            "採血検査（血糖・脂質・肝機能・貧血など）",
+            "便潜血検査",
+            "追加の採血項目",
+            "医師の診察",
+          ],
+          bestFor: "40歳以上の方や、糖尿病・高血圧・脂質異常などが気になる方",
+          color: "#3A7ABD",
+          icon: "🔬",
+        },
+        dockA: {
+          name: "人間ドックA",
+          subtitle: "消化器系ドック",
+          description:
+            "消化器系を中心にしっかり調べる人間ドック。胃カメラ・腹部エコー・肺機能検査を含みます。",
+          includes: [
+            "問診・既往歴の確認",
+            "身長・体重・BMI・腹囲測定",
+            "血圧測定",
+            "視力検査",
+            "聴力検査",
+            "尿検査（糖・蛋白）",
+            "胸部レントゲン",
+            "心電図検査",
+            "採血検査（血糖・脂質・肝機能・貧血など）",
+            "便潜血検査",
+            "胃カメラ（上部内視鏡）",
+            "腹部エコー",
+            "肺機能検査",
+            "医師の診察",
+          ],
+          bestFor: "胃の症状が気になる方、初めて人間ドックを受ける方",
+          color: "#2E6DAF",
+          icon: "🏥",
+        },
+        dockB: {
+          name: "人間ドックB",
+          subtitle: "消化器系ドック＋大腸カメラ",
+          description:
+            "人間ドックAに大腸カメラを追加した最も包括的なコース。上部・下部の消化管をまとめてチェックできます。",
+          includes: [
+            "問診・既往歴の確認",
+            "身長・体重・BMI・腹囲測定",
+            "血圧測定",
+            "視力検査",
+            "聴力検査",
+            "尿検査（糖・蛋白）",
+            "胸部レントゲン",
+            "心電図検査",
+            "採血検査（血糖・脂質・肝機能・貧血など）",
+            "便潜血検査",
+            "胃カメラ（上部内視鏡）",
+            "腹部エコー",
+            "肺機能検査",
+            "大腸カメラ（下部内視鏡）",
+            "医師の診察",
+          ],
+          bestFor: "大腸がんのリスクが気になる方、便潜血陽性だった方",
+          color: "#1F5F9F",
+          icon: "🔍",
+        },
+        endoscopy: {
+          name: "内視鏡ドック",
+          subtitle: "胃＋大腸カメラ同日受診",
+          description:
+            "胃カメラと大腸カメラを同日に受診できる効率的なコース。忙しい方にも受けやすい構成です。",
+          includes: [
+            "胃カメラ（上部内視鏡）",
+            "大腸カメラ（下部内視鏡）",
+            "同日実施で来院1回",
+          ],
+          bestFor: "胃と大腸を一度にチェックしたい方、何度も来院が難しい方",
+          color: "#0F4F8F",
+          icon: "📅",
+        },
+      };
+
+      const QUESTIONS = {
+        q1: {
+          question: "今回の健診で一番近い目的は？",
+          options: [
+            {
+              label: "会社の定期健診として",
+              sublabel: "職場から受けるよう言われた",
+              icon: "🏢",
+              value: "company",
+            },
+            {
+              label: "自分で健康チェック",
+              sublabel: "特に症状はないけど気になる",
+              icon: "🩺",
+              value: "self",
+            },
+            {
+              label: "しっかり検査したい",
+              sublabel: "がん検診・人間ドック希望",
+              icon: "🔬",
+              value: "thorough",
+            },
+          ],
+        },
+        q2_company: {
+          question: "検査の範囲はどこまで希望しますか？",
+          options: [
+            {
+              label: "最低限でOK",
+              sublabel: "採血・心電図なしの簡易版",
+              icon: "⚡",
+              value: "minimal",
+            },
+            {
+              label: "法定健診をきちんと",
+              sublabel: "採血・心電図を含む標準コース",
+              icon: "📋",
+              value: "standard",
+            },
+            {
+              label: "せっかくなら詳しく",
+              sublabel: "便潜血や追加の血液検査も",
+              icon: "✨",
+              value: "detailed",
+            },
+          ],
+        },
+        q2_age: {
+          question: "年齢を教えてください",
+          options: [
+            { label: "39歳以下", sublabel: "", icon: "🌱", value: "young" },
+            { label: "40歳以上", sublabel: "", icon: "🌳", value: "over40" },
+          ],
+        },
+        q3_self_young: {
+          question: "気になっていることはありますか？",
+          options: [
+            {
+              label: "特にないけど一通り受けたい",
+              sublabel: "採血・心電図を含む法定健診レベル",
+              icon: "👌",
+              value: "basic",
+            },
+            {
+              label: "血液検査を詳しくしておきたい",
+              sublabel: "コレステロールや血糖値が少し気になる",
+              icon: "💡",
+              value: "lifestyle",
+            },
+            {
+              label: "家族にがんの人がいる・胃腸の不調がある",
+              sublabel: "若くても内視鏡で一度しっかり調べたい",
+              icon: "🏥",
+              value: "endoscope",
+            },
+          ],
+        },
+        q3_self_over40: {
+          question: "気になっていることはありますか？",
+          options: [
+            {
+              label: "生活習慣病をチェックしたい",
+              sublabel: "血圧・血糖・脂質をまとめて確認",
+              icon: "🔬",
+              value: "lifestyle",
+            },
+            {
+              label: "そろそろ胃カメラを受けておきたい",
+              sublabel: "40歳を超えたらがん検診も視野に",
+              icon: "🏥",
+              value: "endoscope",
+            },
+          ],
+        },
+        q3_thorough_young: {
+          question: "しっかり調べたい理由に近いのは？",
+          options: [
+            {
+              label: "血液検査を徹底的にやりたい",
+              sublabel: "生活習慣病のリスクを早めに把握",
+              icon: "🔬",
+              value: "lifestyle",
+            },
+            {
+              label: "家族にがんの人がいる・胃腸が心配",
+              sublabel: "年齢に関係なく内視鏡で確認しておきたい",
+              icon: "🏥",
+              value: "endoscope",
+            },
+          ],
+        },
+        q3_thorough_over40: {
+          question: "特に気になる検査は？",
+          options: [
+            {
+              label: "まずは生活習慣病をしっかり",
+              sublabel: "糖尿病・高血圧・脂質異常を網羅的に",
+              icon: "🔬",
+              value: "lifestyle",
+            },
+            {
+              label: "がん検診も含めて徹底的に",
+              sublabel: "40歳を超えたら胃・大腸も調べておきたい",
+              icon: "🏥",
+              value: "endoscope",
+            },
+          ],
+        },
+        q4_endoscope: {
+          question: "健康診断と内視鏡を一緒に受けたいですか？",
+          options: [
+            {
+              label: "健診＋胃カメラ",
+              sublabel: "健診に加えて腹部エコー・肺機能検査も",
+              icon: "🔎",
+              value: "gastro",
+            },
+            {
+              label: "健診＋胃・大腸カメラ",
+              sublabel: "健診も内視鏡もまとめてしっかり",
+              icon: "🔍",
+              value: "both",
+            },
+            {
+              label: "内視鏡だけでOK",
+              sublabel: "胃＋大腸カメラを同日で受診",
+              icon: "📅",
+              value: "sameday",
+            },
+          ],
+        },
+      };
+
+      function getNextQuestion(answers) {
+        const { q1, q2, q3, q4 } = answers;
+        if (!q1) return "q1";
+        if (!q2) {
+          if (q1 === "company") return "q2_company";
+          return "q2_age";
+        }
+        if (q1 === "company") return null;
+        if (!q3) {
+          if (q1 === "self")
+            return q2 === "young" ? "q3_self_young" : "q3_self_over40";
+          return q2 === "young" ? "q3_thorough_young" : "q3_thorough_over40";
+        }
+        if (q3 === "endoscope" && !q4) return "q4_endoscope";
+        return null;
+      }
+
+      function getResult(answers) {
+        const { q1, q2, q3, q4 } = answers;
+        if (q1 === "company") {
+          if (q2 === "minimal") return "kensinA";
+          if (q2 === "standard") return "kensinB";
+          if (q2 === "detailed") return "kensinC";
+        }
+        if (q3 === "basic") return "kensinB";
+        if (q3 === "lifestyle") return "kensinC";
+        if (q3 === "endoscope") {
+          if (q4 === "gastro") return "dockA";
+          if (q4 === "both") return "dockB";
+          if (q4 === "sameday") return "endoscopy";
+        }
+        return "kensinB";
+      }
+
+      function getTotalSteps(answers) {
+        const { q1, q3 } = answers;
+        if (q1 === "company") return 2;
+        if (q3 === "endoscope") return 4;
+        if (q3) return 3;
+        return 3;
+      }
+
+      function getCurrentStep(answers) {
+        if (!answers.q1) return 1;
+        if (!answers.q2) return 2;
+        if (answers.q1 === "company") return 2;
+        if (!answers.q3) return 3;
+        if (answers.q3 === "endoscope" && !answers.q4) return 4;
+        return 4;
+      }
+
+      const S = {
+        wrapper: {
+          minHeight: "100vh",
+          background:
+            "linear-gradient(160deg, #f0f6fc 0%, #e8f1fa 40%, #f5f0eb 100%)",
+          fontFamily: "'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif",
+          padding: "20px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        },
+        container: { width: "100%", maxWidth: "560px", margin: "0 auto" },
+        header: {
+          textAlign: "center",
+          marginBottom: "32px",
+          paddingTop: "20px",
+        },
+        badge: {
+          display: "inline-block",
+          background: "linear-gradient(135deg, #2E6DAF, #1F5F9F)",
+          color: "#fff",
+          fontSize: "11px",
+          fontWeight: 700,
+          letterSpacing: "0.1em",
+          padding: "6px 16px",
+          borderRadius: "100px",
+          marginBottom: "16px",
+        },
+        title: {
+          fontSize: "22px",
+          fontWeight: 800,
+          color: "#1a2a3a",
+          lineHeight: 1.5,
+          margin: "0 0 8px 0",
+        },
+        subtitle: {
+          fontSize: "14px",
+          color: "#6b7c8d",
+          margin: 0,
+          lineHeight: 1.6,
+        },
+        progressBar: {
+          display: "flex",
+          gap: "8px",
+          marginBottom: "28px",
+          padding: "0 4px",
+        },
+        progressDot: function (active, done) {
+          return {
+            flex: 1,
+            height: "4px",
+            borderRadius: "4px",
+            background: done
+              ? "#2E6DAF"
+              : active
+                ? "linear-gradient(90deg, #2E6DAF, #5B9BD5)"
+                : "#d5dfe8",
+            transition: "all 0.4s ease",
+          };
+        },
+        card: {
+          background: "#fff",
+          borderRadius: "20px",
+          padding: "28px 24px",
+          boxShadow:
+            "0 2px 20px rgba(30,60,100,.06), 0 0 0 1px rgba(30,60,100,.04)",
+        },
+        qText: {
+          fontSize: "17px",
+          fontWeight: 700,
+          color: "#1a2a3a",
+          marginBottom: "20px",
+          lineHeight: 1.5,
+        },
+        optBtn: function (h) {
+          return {
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            gap: "14px",
+            padding: "16px 18px",
+            marginBottom: "10px",
+            border: h ? "2px solid #2E6DAF" : "2px solid #e8eef4",
+            borderRadius: "14px",
+            background: h
+              ? "linear-gradient(135deg,#f0f6fc,#e8f1fa)"
+              : "#fafcfe",
+            cursor: "pointer",
+            transition: "all .2s ease",
+            textAlign: "left",
+            transform: h ? "translateY(-1px)" : "none",
+            boxShadow: h ? "0 4px 12px rgba(46,109,175,.12)" : "none",
+          };
+        },
+        optIcon: {
+          fontSize: "26px",
+          flexShrink: 0,
+          width: "44px",
+          height: "44px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "12px",
+          background: "#f0f4f8",
+        },
+        optLabel: {
+          fontSize: "15px",
+          fontWeight: 600,
+          color: "#1a2a3a",
+          lineHeight: 1.4,
+        },
+        optSub: {
+          fontSize: "12px",
+          color: "#8899aa",
+          marginTop: "2px",
+          lineHeight: 1.4,
+        },
+        resCard: {
+          background: "#fff",
+          borderRadius: "20px",
+          overflow: "hidden",
+          boxShadow:
+            "0 2px 20px rgba(30,60,100,.06), 0 0 0 1px rgba(30,60,100,.04)",
+        },
+        resHead: function (c) {
+          return {
+            background: "linear-gradient(135deg," + c + "," + c + "dd)",
+            padding: "28px 24px",
+            textAlign: "center",
+            color: "#fff",
+          };
+        },
+        resBody: { padding: "24px" },
+        secTitle: {
+          fontSize: "13px",
+          fontWeight: 700,
+          color: "#2E6DAF",
+          marginBottom: "8px",
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+        },
+        resItem: {
+          fontSize: "13px",
+          color: "#4a5568",
+          padding: "6px 0 6px 20px",
+          position: "relative",
+          lineHeight: 1.5,
+        },
+        bestBox: {
+          background: "linear-gradient(135deg,#f0f6fc,#e8f1fa)",
+          borderRadius: "12px",
+          padding: "14px 16px",
+          marginTop: "16px",
+        },
+        ctaBtn: {
+          width: "100%",
+          padding: "16px",
+          marginTop: "10px",
+          border: "none",
+          borderRadius: "14px",
+          background: "linear-gradient(135deg,#2E6DAF,#1F5F9F)",
+          color: "#fff",
+          fontSize: "15px",
+          fontWeight: 700,
+          cursor: "pointer",
+          transition: "all .2s ease",
+          boxShadow: "0 4px 14px rgba(46,109,175,.25)",
+        },
+        retryBtn: {
+          width: "100%",
+          padding: "16px",
+          marginTop: "16px",
+          border: "2px solid #e8eef4",
+          borderRadius: "14px",
+          background: "#fff",
+          color: "#4a5568",
+          fontSize: "14px",
+          fontWeight: 600,
+          cursor: "pointer",
+          transition: "all .2s ease",
+        },
+        fade: { animation: "fadeSlideIn .35s ease forwards" },
+      };
+
+      function Opt({ option, onClick }) {
+        const [h, setH] = useState(false);
+        return (
+          <button
+            style={S.optBtn(h)}
+            onMouseEnter={() => setH(true)}
+            onMouseLeave={() => setH(false)}
+            onClick={() => onClick(option.value)}
+          >
+            <div style={S.optIcon}>{option.icon}</div>
+            <div>
+              <div style={S.optLabel}>{option.label}</div>
+              {option.sublabel && <div style={S.optSub}>{option.sublabel}</div>}
+            </div>
+          </button>
+        );
+      }
+
+      function QView({ qd, onSelect, step, total }) {
+        return (
+          <div key={qd.question} style={S.fade}>
+            <div style={S.progressBar}>
+              {Array.from({ length: total }, (_, i) => (
+                <div
+                  key={i}
+                  style={S.progressDot(i + 1 === step, i + 1 < step)}
+                />
+              ))}
+            </div>
+            <div style={S.card}>
+              <div style={S.qText}>
+                <span
+                  style={{
+                    color: "#2E6DAF",
+                    marginRight: "8px",
+                    fontSize: "14px",
+                  }}
+                >
+                  Q{step}
+                </span>
+                {qd.question}
+              </div>
+              {qd.options.map((o) => (
+                <Opt key={o.value} option={o} onClick={onSelect} />
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      function RView({ courseKey, onRetry }) {
+        const c = COURSES[courseKey];
+        return (
+          <div style={S.fade}>
+            <div style={{ textAlign: "center", marginBottom: "20px" }}>
+              <div
+                style={{
+                  fontSize: "13px",
+                  color: "#6b7c8d",
+                  fontWeight: 600,
+                  letterSpacing: ".05em",
+                }}
+              >
+                あなたにおすすめの健診は…
+              </div>
+            </div>
+            <div style={S.resCard}>
+              <div style={S.resHead(c.color)}>
+                <div style={{ fontSize: "40px", marginBottom: "12px" }}>
+                  {c.icon}
+                </div>
+                <div
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: 800,
+                    marginBottom: "4px",
+                  }}
+                >
+                  {c.name}
+                </div>
+                <div style={{ fontSize: "13px", opacity: 0.85 }}>
+                  {c.subtitle}
+                </div>
+              </div>
+              <div style={S.resBody}>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    color: "#4a5568",
+                    lineHeight: 1.8,
+                    marginBottom: "20px",
+                  }}
+                >
+                  {c.description}
+                </div>
+                <div style={{ marginBottom: "16px" }}>
+                  <div style={S.secTitle}>✅ 含まれる検査</div>
+                  {c.includes.map((it, i) => (
+                    <div key={i} style={S.resItem}>
+                      <span
+                        style={{
+                          position: "absolute",
+                          left: 0,
+                          color: "#2E6DAF",
+                        }}
+                      >
+                        ・
+                      </span>
+                      {it}
+                    </div>
+                  ))}
+                </div>
+                {c.notIncludes && (
+                  <div style={{ marginBottom: "16px" }}>
+                    <div
+                      style={Object.assign({}, S.secTitle, {
+                        color: "#a0aab4",
+                      })}
+                    >
+                      — 含まれない検査
+                    </div>
+                    {c.notIncludes.map((it, i) => (
+                      <div
+                        key={i}
+                        style={Object.assign({}, S.resItem, {
+                          color: "#a0aab4",
+                        })}
+                      >
+                        <span style={{ position: "absolute", left: 0 }}>
+                          ・
+                        </span>
+                        {it}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div style={S.bestBox}>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#2E6DAF",
+                      fontWeight: 600,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    💡 {c.bestFor}
+                  </div>
+                </div>
+                <button
+                  style={S.ctaBtn}
+                  onMouseEnter={(e) => {
+                    e.target.style.opacity = "0.9";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.opacity = "1";
+                  }}
+                  onClick={() =>
+                    window.open(
+                      "https://libe-clinic-osaka.com/reserve_online",
+                      "_blank",
+                    )
+                  }
+                >
+                  この健診を予約する →
+                </button>
+                <button
+                  style={S.retryBtn}
+                  onMouseEnter={(e) => {
+                    e.target.style.borderColor = "#2E6DAF";
+                    e.target.style.color = "#2E6DAF";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.borderColor = "#e8eef4";
+                    e.target.style.color = "#4a5568";
+                  }}
+                  onClick={onRetry}
+                >
+                  もう一度やり直す
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function App() {
+        const [answers, setAnswers] = useState({});
+        const [phase, setPhase] = useState("question");
+        const [result, setResult] = useState(null);
+        const [animKey, setAnimKey] = useState(0);
+
+        const handleSelect = (value) => {
+          const next = Object.assign({}, answers);
+          const cur = getNextQuestion(answers);
+          if (cur === "q1") next.q1 = value;
+          else if (cur && cur.startsWith("q2")) next.q2 = value;
+          else if (cur && cur.startsWith("q3")) next.q3 = value;
+          else if (cur && cur.startsWith("q4")) next.q4 = value;
+          setAnswers(next);
+          setAnimKey((k) => k + 1);
+          if (!getNextQuestion(next)) {
+            setResult(getResult(next));
+            setTimeout(() => setPhase("result"), 150);
+          }
+        };
+
+        const handleRetry = () => {
+          setAnswers({});
+          setPhase("question");
+          setResult(null);
+          setAnimKey((k) => k + 1);
+        };
+
+        const curQ = getNextQuestion(answers);
+        const qd = curQ ? QUESTIONS[curQ] : null;
+
+        return (
+          <div style={S.wrapper}>
+            <div style={S.container}>
+              <div style={S.header}>
+                <div style={S.badge}>リベ大クリニック</div>
+                <h1 style={S.title}>
+                  あなたにピッタリの
+                  <br />
+                  健康診断を見つけよう
+                </h1>
+                <p style={S.subtitle}>
+                  {phase === "question"
+                    ? "かんたんな質問に答えるだけで、おすすめの健診コースがわかります"
+                    : "あなたの回答をもとに、最適なコースを選びました"}
+                </p>
+              </div>
+              <div key={animKey}>
+                {phase === "question" && qd && (
+                  <QView
+                    qd={qd}
+                    onSelect={handleSelect}
+                    step={getCurrentStep(answers)}
+                    total={getTotalSteps(answers)}
+                  />
+                )}
+                {phase === "result" && result && (
+                  <RView courseKey={result} onRetry={handleRetry} />
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>
